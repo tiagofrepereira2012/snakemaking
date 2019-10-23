@@ -1,0 +1,1 @@
+# Snakemake integration with Bob
