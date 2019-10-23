@@ -1,0 +1,25 @@
+rule EXPONENTIAL:
+    input:
+        "cars.csv"
+    output:
+        "cars.hdf5"
+    shell:
+        "python exponential.py {input} {output} --degree 1"
+
+rule EXPONENTIAL2:
+    input:
+        "cars.csv"
+    output:
+        "cars_squared.hdf5"
+    shell:
+        "python exponential.py {input} {output} --degree 2"
+
+
+rule MODELS:
+    input:
+        "cars.hdf5",
+        "cars_squared.hdf5"
+    output:
+        "models.hdf5"
+    shell:
+        "python create_model.py {input} --output-file {output}"
