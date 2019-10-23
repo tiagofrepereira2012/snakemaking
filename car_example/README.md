@@ -16,6 +16,7 @@ This runs the very stupid example below:
 ```
 ![Alt text](https://g.gravizo.com/source/custom_mark10?https%3A%2F%2Fraw.githubusercontent.com%2FTLmaK0%2Fgravizo%2Fmaster%2FREADME.md)
 <details><summary></summary>
+custom_mark10
 digraph snakemake_dag {
     graph[bgcolor=white, margin=0];
     node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
@@ -26,6 +27,7 @@ digraph snakemake_dag {
 	1 -> 0
 	2 -> 0
 }
+custom_mark10
 </details>
 ```
 
