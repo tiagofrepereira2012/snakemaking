@@ -11,9 +11,9 @@ Follow the code below to reproduce the execution.
 snakemake --snakefile snake-template.rules EXPONENTIAL EXPONENTIAL2 MODELS -f --jobs 2
 ```
 
-This runs the very stupid example below
+This runs the very stupid example below:
 
-```graphviz
+```
 ![Alt text](https://g.gravizo.com/source/custom_mark10?https%3A%2F%2Fraw.githubusercontent.com%2FTLmaK0%2Fgravizo%2Fmaster%2FREADME.md)
 <details><summary></summary>
 digraph snakemake_dag {
