@@ -41,14 +41,62 @@ algorithm = bob.bio.base.algorithm.PCA(subspace_dimension=0.95)
 #########
 
 TRAINING_RAW_DATA = [f.make_path(directory=path, extension=".pgm") for f in db.training_files()]
+ENROLL_RAW_DATA = [f.make_path(directory=path, extension=".pgm") for f in db.enroll_files()]
+PROBE_RAW_DATA = [f.make_path(directory=path, extension=".pgm") for f in db.probe_files()]
+# TODO: IT SEEMS THAT I CAN'T PROVIDE AS INPUT A CONCATENATION OF LISTS
+ALL_RAW_DATA = TRAINING_RAW_DATA + ENROLL_RAW_DATA + PROBE_RAW_DATA 
+
 
 TRAINING_PREPROCESSED_DATA = [f.make_path(directory="preprocessed", extension=".hdf5") for f in db.training_files()]
+ENROLL_PREPROCESSED_DATA = [f.make_path(directory="preprocessed", extension=".hdf5") for f in db.enroll_files()]
+PROBE_PREPROCESSED_DATA = [f.make_path(directory="preprocessed", extension=".hdf5") for f in db.probe_files()]
+ALL_PREPROCESSED_DATA = TRAINING_PREPROCESSED_DATA + ENROLL_PREPROCESSED_DATA + PROBE_PREPROCESSED_DATA 
+
+
 
 TRAINING_EXTRACTED_DATA = [f.make_path(directory="extracted", extension=".hdf5") for f in db.training_files()]
+ENROLL_EXTRACTED_DATA = [f.make_path(directory="extracted", extension=".hdf5") for f in db.enroll_files()]
+PROBE_EXTRACTED_DATA = [f.make_path(directory="extracted", extension=".hdf5") for f in db.probe_files()]
+ALL_EXTRACTED_DATA = TRAINING_EXTRACTED_DATA + ENROLL_EXTRACTED_DATA + PROBE_EXTRACTED_DATA 
 
-TRAINING_PROJECTED_DATA = [f.make_path(directory="projected", extension=".hdf5") for f in db.training_files()]
 
 
+#TRAINING_PROJECTED_DATA = [f.make_path(directory="projected", extension=".hdf5") for f in db.training_files()]
+ENROLL_PROJECTED_DATA = [f.make_path(directory="projected", extension=".hdf5") for f in db.enroll_files()]
+PROBE_PROJECTED_DATA = [f.make_path(directory="projected", extension=".hdf5") for f in db.probe_files()]
+
+
+model_numbers = db.model_ids(groups="dev")
+
+MODELS = ["models/{0}.hdf5".format(str(model_id)) for model_id in model_numbers]
+
+ENROLL_DATA = dict([["models/{0}.hdf5".format(model_id),
+                    [f.make_path(directory="projected", extension=".hdf5") 
+                       for f in db.enroll_files(model_id=int(model_id))]]
+                    for model_id in model_numbers])
+
+###########
+# ENROLL
+##########
+
+
+wildcard_constraints:
+    k = '|'.join(re.escape(k) for k in MODELS)
+
+
+rule enroll_all:
+    input:
+        expand('{k}', k=MODELS)
+
+rule ENROLL:
+    input: 
+        input_file = lambda wc: ENROLL_DATA[wc.k]
+    output:
+        output_file='{k}'
+    run:
+        features = load(input.input_file, extractor)        
+        model = algorithm.enroll(features)
+        bob.io.base.save(model, output.output_file)
 
 
 ###########
@@ -56,16 +104,16 @@ TRAINING_PROJECTED_DATA = [f.make_path(directory="projected", extension=".hdf5")
 ###########
 
 
-projected_dict = dict(zip(TRAINING_PROJECTED_DATA, TRAINING_EXTRACTED_DATA))
+projected_dict = dict(zip(ENROLL_PROJECTED_DATA+PROBE_PROJECTED_DATA, ENROLL_EXTRACTED_DATA+PROBE_EXTRACTED_DATA))
 
 # define the preprocessor
 wildcard_constraints:
-    z = '|'.join(re.escape(z) for z in TRAINING_PROJECTED_DATA)
+    z = '|'.join(re.escape(z) for z in ENROLL_PROJECTED_DATA+PROBE_PROJECTED_DATA)
 
 
 rule project_all:
     input:
-        expand('{z}', z=TRAINING_PROJECTED_DATA)
+        expand('{z}', z=ENROLL_PROJECTED_DATA+PROBE_PROJECTED_DATA)
 
 
 rule PROJECT:
@@ -78,7 +126,6 @@ rule PROJECT:
         
         algorithm.load_projector(input.projected_file)
         compute(algorithm.project,input.input_file, output.output_file)
-
 
 
 
@@ -102,16 +149,16 @@ rule TRAIN:
 ################
 
 
-extracted_dict = dict(zip(TRAINING_EXTRACTED_DATA, TRAINING_PREPROCESSED_DATA))
+extracted_dict = dict(zip(ALL_EXTRACTED_DATA, ALL_PREPROCESSED_DATA))
 
 # define the preprocessor
 wildcard_constraints:
-    y = '|'.join(re.escape(y) for y in TRAINING_EXTRACTED_DATA)
+    y = '|'.join(re.escape(y) for y in ALL_EXTRACTED_DATA)
 
 
 rule extract_all:
     input:
-        expand('{y}', y=TRAINING_EXTRACTED_DATA)
+        expand('{y}', y=ALL_EXTRACTED_DATA)
 
 
 rule EXTRACTOR:
@@ -128,16 +175,16 @@ rule EXTRACTOR:
 ###################
 
 
-preprocessed_dict = dict(zip(TRAINING_PREPROCESSED_DATA, TRAINING_RAW_DATA))
+preprocessed_dict = dict(zip(ALL_PREPROCESSED_DATA, ALL_RAW_DATA))
 
 # define the preprocessor
 wildcard_constraints:
-    x = '|'.join(re.escape(x) for x in TRAINING_PREPROCESSED_DATA)
+    x = '|'.join(re.escape(x) for x in ALL_PREPROCESSED_DATA)
 
 
 rule preprocessing_all:
     input:
-        expand('{x}', x=TRAINING_PREPROCESSED_DATA)
+        expand('{x}', x=ALL_PREPROCESSED_DATA)
 
 
 rule PREPROCESSING:
