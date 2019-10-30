@@ -5,7 +5,7 @@ It's still experimental, but we can have the same output as `verify.py`
 
 
 ```sh
-snakemake --snakefile pca.snakemake.py --jobs 100
+snakemake --snakefile pca.snakemake.py --jobs 100 all
 bob bio evaluate ./PCA-experiment/scores-dev
 ```
 
