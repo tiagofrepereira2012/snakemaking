@@ -25,6 +25,7 @@ group = "dev"
 
 BACKGROUND_MODEL_FILE = "projector.hdf5"
 
+
 #########
 # TOOLS
 ########
@@ -76,6 +77,9 @@ ENROLL_DATA = dict([["models/s{0}.hdf5".format(model_id),
                     for model_id in model_numbers])
 
 SCORES = ["scores/s{0}.txt".format(str(model_id)) for model_id in model_numbers]
+
+
+
 
 
 #############
@@ -234,7 +238,7 @@ wildcard_constraints:
     x = '|'.join(re.escape(x) for x in ALL_PREPROCESSED_DATA)
 
 
-rule preprocessing_all:
+rule preprocess_all:
     input:
         expand('{x}', x=ALL_PREPROCESSED_DATA)
 
