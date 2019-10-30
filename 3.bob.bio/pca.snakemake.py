@@ -80,21 +80,135 @@ SCORES = ["scores/s{0}.txt".format(str(model_id)) for model_id in model_numbers]
 
 
 
+###################
+# PREPROCESSING
+###################
+
+
+preprocessed_dict = dict(zip(ALL_PREPROCESSED_DATA, ALL_RAW_DATA))
+
+# define the preprocessor
+wildcard_constraints:
+    x = '|'.join(re.escape(x) for x in ALL_PREPROCESSED_DATA)
+
+
+rule preprocess_all:
+    input:
+        expand('{x}', x=ALL_PREPROCESSED_DATA)
+
+
+rule PREPROCESSING:
+    input:
+        input_file = lambda wc: preprocessed_dict[wc.x]
+    output:
+        output_file = '{x}'
+    run:
+        # define the preprocessor
+        compute(preprocessor, input.input_file, output.output_file)
+
+
+
+################
+# EXTRACTOR
+################
+
+
+extracted_dict = dict(zip(ALL_EXTRACTED_DATA, ALL_PREPROCESSED_DATA))
+
+# define the preprocessor
+wildcard_constraints:
+    y = '|'.join(re.escape(y) for y in ALL_EXTRACTED_DATA)
+
+
+rule extract_all:
+    input:
+        expand('{y}', y=ALL_EXTRACTED_DATA)
+
+
+rule EXTRACTOR:
+    input:        
+        input_file = lambda wc: extracted_dict[wc.y]
+    output:
+        output_file='{y}'
+    run:        
+        compute(extractor, input.input_file, output.output_file)
+
+
+
+################
+# TRAIN BACKGROUND
+################
+
+
+rule TRAIN:
+    input:        
+        input_file = TRAINING_EXTRACTED_DATA
+    output:
+        output_file = BACKGROUND_MODEL_FILE
+    run:
+        features = load(input.input_file, extractor)
+        algorithm.train_projector(features, output.output_file)
+
+
+
+###########
+# PROJECT
+###########
+
+
+projected_dict = dict(zip(ENROLL_PROJECTED_DATA+PROBE_PROJECTED_DATA, ENROLL_EXTRACTED_DATA+PROBE_EXTRACTED_DATA))
+
+# define the preprocessor
+wildcard_constraints:
+    z = '|'.join(re.escape(z) for z in ENROLL_PROJECTED_DATA+PROBE_PROJECTED_DATA)
+
+
+rule project_all:
+    input:
+        expand('{z}', z=ENROLL_PROJECTED_DATA+PROBE_PROJECTED_DATA)
+
+
+rule PROJECT:
+    input: 
+        input_file = lambda wc: projected_dict[wc.z],
+        projected_file = BACKGROUND_MODEL_FILE
+    output:
+        output_file='{z}',
+    run:
+        
+        algorithm.load_projector(input.projected_file)
+        compute(algorithm.project,input.input_file, output.output_file)
+
+
+
+
+###########
+# ENROLL
+##########
+
+
+wildcard_constraints:
+    k = '|'.join(re.escape(k) for k in MODELS)
+
+
+rule enroll_all:
+    input:
+        expand('{k}', k=MODELS)
+
+rule ENROLL:
+    input: 
+        input_file = lambda wc: ENROLL_DATA[wc.k]
+    output:
+        output_file='{k}'
+    run:
+        features = load(input.input_file, extractor)        
+        model = algorithm.enroll(features)
+        bob.io.base.save(model, output.output_file)
 
 
 #############
-# SCORES
+# SCORING
 ############
-
-rule CONCATENATE:
-    input: 
-        input_file = SCORES
-    output:
-        output_file=f'scores-{group}'
-    run:
-        f = open(output.output_file, 'w')
-        for i in input.input_file:
-            f.write(open(i).read())
 
 
 scores_dict = dict(zip(SCORES, MODELS))
@@ -130,125 +244,14 @@ rule SCORE:
             f.write("%s %s %s %3.8f\n" % (str(model_id), str(probe_id), str(probe_file), scores[i]))
 
 
-
-###########
-# ENROLL
-##########
-
-
-wildcard_constraints:
-    k = '|'.join(re.escape(k) for k in MODELS)
-
-
-rule enroll_all:
-    input:
-        expand('{k}', k=MODELS)
-
-rule ENROLL:
+### MAIN RULE
+rule all:
     input: 
-        input_file = lambda wc: ENROLL_DATA[wc.k]
+        input_file = SCORES
     output:
-        output_file='{k}'
+        output_file=f'scores-{group}'
     run:
-        features = load(input.input_file, extractor)        
-        model = algorithm.enroll(features)
-        bob.io.base.save(model, output.output_file)
-
-
-###########
-# PROJECTED
-###########
-
-
-projected_dict = dict(zip(ENROLL_PROJECTED_DATA+PROBE_PROJECTED_DATA, ENROLL_EXTRACTED_DATA+PROBE_EXTRACTED_DATA))
-
-# define the preprocessor
-wildcard_constraints:
-    z = '|'.join(re.escape(z) for z in ENROLL_PROJECTED_DATA+PROBE_PROJECTED_DATA)
-
-
-rule project_all:
-    input:
-        expand('{z}', z=ENROLL_PROJECTED_DATA+PROBE_PROJECTED_DATA)
-
-
-rule PROJECT:
-    input: 
-        input_file = lambda wc: projected_dict[wc.z],
-        projected_file = BACKGROUND_MODEL_FILE
-    output:
-        output_file='{z}',
-    run:
-        
-        algorithm.load_projector(input.projected_file)
-        compute(algorithm.project,input.input_file, output.output_file)
-
-
-
-################
-# TRAIN BACKGROUND
-################
-
-
-rule TRAIN:
-    input:        
-        input_file = TRAINING_EXTRACTED_DATA
-    output:
-        output_file = BACKGROUND_MODEL_FILE
-    run:
-        features = load(input.input_file, extractor)
-        algorithm.train_projector(features, output.output_file)
-
-
-################
-# EXTRACTOR
-################
-
-
-extracted_dict = dict(zip(ALL_EXTRACTED_DATA, ALL_PREPROCESSED_DATA))
-
-# define the preprocessor
-wildcard_constraints:
-    y = '|'.join(re.escape(y) for y in ALL_EXTRACTED_DATA)
-
-
-rule extract_all:
-    input:
-        expand('{y}', y=ALL_EXTRACTED_DATA)
-
-
-rule EXTRACTOR:
-    input:        
-        input_file = lambda wc: extracted_dict[wc.y]
-    output:
-        output_file='{y}'
-    run:        
-        compute(extractor, input.input_file, output.output_file)
-
-
-###################
-# PREPROCESSING
-###################
-
-
-preprocessed_dict = dict(zip(ALL_PREPROCESSED_DATA, ALL_RAW_DATA))
-
-# define the preprocessor
-wildcard_constraints:
-    x = '|'.join(re.escape(x) for x in ALL_PREPROCESSED_DATA)
-
-
-rule preprocess_all:
-    input:
-        expand('{x}', x=ALL_PREPROCESSED_DATA)
-
-
-rule PREPROCESSING:
-    input:
-        input_file = lambda wc: preprocessed_dict[wc.x]
-    output:
-        output_file = '{x}'
-    run:
-        # define the preprocessor
-        compute(preprocessor, input.input_file, output.output_file)
+        f = open(output.output_file, 'w')
+        for i in input.input_file:
+            f.write(open(i).read())
 
