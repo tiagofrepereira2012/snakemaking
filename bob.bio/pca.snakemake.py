@@ -68,12 +68,64 @@ PROBE_PROJECTED_DATA = [f.make_path(directory="projected", extension=".hdf5") fo
 
 model_numbers = db.model_ids(groups="dev")
 
-MODELS = ["models/{0}.hdf5".format(str(model_id)) for model_id in model_numbers]
+MODELS = ["models/s{0}.hdf5".format(str(model_id)) for model_id in model_numbers]
 
-ENROLL_DATA = dict([["models/{0}.hdf5".format(model_id),
+ENROLL_DATA = dict([["models/s{0}.hdf5".format(model_id),
                     [f.make_path(directory="projected", extension=".hdf5") 
                        for f in db.enroll_files(model_id=int(model_id))]]
                     for model_id in model_numbers])
+
+SCORES = ["scores/s{0}.txt".format(str(model_id)) for model_id in model_numbers]
+
+
+#############
+# SCORES
+############
+
+rule CONCATENATE:
+    input: 
+        input_file = SCORES
+    output:
+        output_file=f'scores-{group}'
+    run:
+        f = open(output.output_file, 'w')
+        for i in input.input_file:
+            f.write(open(i).read())
+
+
+scores_dict = dict(zip(SCORES, MODELS))
+
+wildcard_constraints:
+    y = '|'.join(re.escape(y) for y in SCORES)
+
+
+rule score_all:
+    input:
+        expand('{y}', y=SCORES)
+
+rule SCORE:
+    input: 
+        input_file = lambda wc: scores_dict[wc.y],
+        probe_files = PROBE_PROJECTED_DATA,
+        projected_file = BACKGROUND_MODEL_FILE
+    output:
+        output_file='{y}'
+    run:
+        algorithm.load_projector(input.projected_file)
+        model = algorithm.read_model(input.input_file)
+        probes = load(input.probe_files, extractor)        
+        scores = [algorithm.score(model, p) for p in probes]
+
+        f = open(output.output_file, 'w')
+
+        # write scores in four-column format as string
+        for i, probe_file in enumerate(input.probe_files):
+            # TODO: hacking here
+            model_id = os.path.splitext(input.input_file)[0].split("/")[-1]
+            probe_id = os.path.splitext(probe_file)[0].split("/")[-2]
+            f.write("%s %s %s %3.8f\n" % (str(model_id), str(probe_id), str(probe_file), scores[i]))
+
+
 
 ###########
 # ENROLL
