@@ -14,7 +14,7 @@ snakemake --snakefile snake-template.rules EXPONENTIAL EXPONENTIAL2 MODELS -f --
 This runs the very stupid example below:
 
 
-![Alt text](https://g.gravizo.com/source/custom_mark10?https%3A%2F%2Fraw.githubusercontent.com%2Ftiagofrepereira2012%2Fsnakemaking%2Fmaster%2Fcar_example%2FREADME.md)
+![Alt text](https://g.gravizo.com/source/custom_mark10?https://raw.githubusercontent.com/tiagofrepereira2012/snakemaking/master/1.car_example/README.md)
 <details><summary></summary>
 custom_mark10
 digraph snakemake_dag {

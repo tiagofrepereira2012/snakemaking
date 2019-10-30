@@ -10,7 +10,7 @@ bob bio evaluate ./PCA-experiment/scores-dev
 ```
 
 
-![Alt text](https://g.gravizo.com/source/custom_mark10?https://raw.githubusercontent.com/tiagofrepereira2012/snakemaking/master/bob.bio/README.md)
+![Alt text](https://g.gravizo.com/source/custom_mark10?https://raw.githubusercontent.com/tiagofrepereira2012/snakemaking/master/3.bob.bio/README.md)
 <details><summary></summary>
 custom_mark10
 digraph snakemake_dag {
