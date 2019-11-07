@@ -1,0 +1,130 @@
+#### DEFINITION OF THE EXPERIMENT
+configfile: "config.yaml"
+workdir: "PCA-experiment"
+
+
+### SOME BASE FUNCTIONS
+
+import bob.io.base
+import bob.bio.base
+import bob.bio.face
+import numpy
+#from .snakemakedb import SnakemakeDb
+include: "./snakemakedb.py"
+
+def load(file_names, extractor):
+    return bob.bio.base.tools.extractor.read_features(file_names,
+            extractor,
+            split_by_client=False
+            ) 
+
+####
+# Database
+####
+
+db = bob.bio.face.database.AtntBioDatabase()
+snakemake_db = SnakemakeDb(db)
+
+
+
+###################
+# PREPROCESSING
+###################
+preproc_dict = snakemake_db.get_preproc_dict(config["database_path"],
+                                             "preprocessed",
+                                             ".pgm", ".hdf5"
+                                            )
+
+wildcard_constraints:
+    output_card = snakemake_db.get_preproc_wildcard()
+
+# HANDLING I/O
+rule preproc_all:
+    input:
+        expand("{output_card}", output_card=preproc_dict.keys())
+        
+
+rule PREPROCESS:
+    input:
+        input_file = lambda wc: preproc_dict[wc.output_card] 
+
+    output:
+        output_file = '{output_card}'
+
+    wrapper:
+        # define the preprocessor
+        #
+        "file://../wrappers/bob.bio.face/preprocessor/base/"
+
+
+
+###################
+# EXTRACT
+###################
+extract_dict = snakemake_db.get_extract_dict("preprocessed", "extract",
+                                             ".hdf5", ".hdf5")
+
+wildcard_constraints:
+    extract_wc = snakemake_db.get_extract_wildcard()
+
+# HANDLING I/O
+rule extract_all:
+    input:
+        expand("{extract_wc}", extract_wc=extract_dict.keys())
+        
+
+rule EXTRACT:
+    input:
+        input_file = lambda wc: extract_dict[wc.extract_wc] 
+
+    output:
+        output_file = '{extract_wc}'
+
+    wrapper:
+        # define the extractor
+        #
+        "file://../wrappers/bob.bio.base/extractor/linearize/"
+
+
+#########
+# TRAIN
+#########
+
+rule TRAIN:
+    input:        
+        input_files = extract_dict.keys()
+    output:
+        output_file = "Projector.hdf5"
+    wrapper:
+        "file://../wrappers/bob.bio.base/algorithm/pca/pca_training/"
+        
+
+
+
+###################
+# PROJECT
+###################
+project_dict = snakemake_db.get_project_dict("extract", "project",
+                                             ".hdf5", ".hdf5")
+
+wildcard_constraints:
+    project_wc = snakemake_db.get_project_wildcard()
+
+# HANDLING I/O
+rule project_all:
+    input:
+        expand("{project_wc}", project_wc=project_dict.keys())
+        
+
+rule PROJECT:
+    input:
+        input_file = lambda wc: project_dict[wc.project_wc],
+        background_model = "Projector.hdf5"
+    output:
+        output_file = '{project_wc}'
+
+    wrapper:
+        # define the extractor
+        #
+        "file://../wrappers/bob.bio.base/algorithm/pca/pca_projection"
+
