@@ -4,25 +4,16 @@ workdir: "PCA-experiment"
 include: "./snakemakedb.py"
 
 
-### SOME BASE FUNCTIONS
+### TODO: HOW TO PARAMETRIZE THIS?
 
-import bob.io.base
-import bob.bio.base
 import bob.bio.face
-import numpy
+db = bob.bio.face.database.AtntBioDatabase()
 
-
-def load(file_names, extractor):
-    return bob.bio.base.tools.extractor.read_features(file_names,
-            extractor,
-            split_by_client=False
-            ) 
 
 ####
 # Database
 ####
 
-db = bob.bio.face.database.AtntBioDatabase()
 snakemake_db = SnakemakeDb(db)
 
 
