@@ -1,6 +1,7 @@
 #### DEFINITION OF THE EXPERIMENT
 configfile: "config.yaml"
 workdir: "PCA-experiment"
+include: "./snakemakedb.py"
 
 
 ### SOME BASE FUNCTIONS
@@ -9,8 +10,7 @@ import bob.io.base
 import bob.bio.base
 import bob.bio.face
 import numpy
-#from .snakemakedb import SnakemakeDb
-include: "./snakemakedb.py"
+
 
 def load(file_names, extractor):
     return bob.bio.base.tools.extractor.read_features(file_names,
