@@ -27,7 +27,7 @@ To run this example do the following steps
 ```sh
 conda env create -f envs/env.yml
 conda activate snakemaking
-snakemake all
+snakemake all --configfile config.yaml
 ```
 
 

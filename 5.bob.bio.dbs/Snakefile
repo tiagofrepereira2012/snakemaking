@@ -1,5 +1,4 @@
 #### DEFINITION OF THE EXPERIMENT
-configfile: "config.yaml"
 workdir: "PCA-experiment"
 include: "./snakemakedb.py"
 
