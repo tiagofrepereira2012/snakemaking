@@ -3,7 +3,7 @@
 In this example I'll try to modularize the previous example `../3.bob.bio`
 using `https://snakemake.readthedocs.io/en/stable/tutorial/additional_features.html#modularization`.
 
-Here I'm imagining one set of rules for each bob.bio.*[preprocessor, extractor, algorithm], and those can be anything e.g (python entrypoint scripts, binaries, python functions, ...).
+Here I'm imagining one set of rules for each bob.bio.[preprocessor, extractor, algorithm], and those can be anything e.g (python entrypoint scripts, binaries, python functions, ...).
 The configuration of the experiment is defined in the `Snakefile` file, where all the rules are binded together.
 
 So far I haven't defined conda envs per rule, hence, you'll need to create the conda env yourself.

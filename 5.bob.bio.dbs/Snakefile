@@ -61,7 +61,7 @@ rule PREPROCESS:
 ###################
 # EXTRACT
 ###################
-extract_dict = snakemake_db.get_extract_dict("preprocessed", "extract",
+extract_dict = snakemake_db.get_extract_dict("preprocessed", "extracted",
                                              ".hdf5", ".hdf5")
 
 wildcard_constraints:
@@ -95,6 +95,8 @@ rule TRAIN:
         input_files = extract_dict.keys()
     output:
         output_file = "Projector.hdf5"
+    params:
+       pca_dim = config["pca_dim"]
     wrapper:
         "file://../wrappers/bob.bio.base/algorithm/pca/pca_training/"
         
@@ -104,7 +106,7 @@ rule TRAIN:
 ###################
 # PROJECT
 ###################
-project_dict = snakemake_db.get_project_dict("extract", "project",
+project_dict = snakemake_db.get_project_dict("extracted", "projected",
                                              ".hdf5", ".hdf5")
 
 wildcard_constraints:
@@ -122,9 +124,87 @@ rule PROJECT:
         background_model = "Projector.hdf5"
     output:
         output_file = '{project_wc}'
-
+    params:
+       pca_dim = config["pca_dim"]
+   
     wrapper:
-        # define the extractor
+        # define the projector
         #
         "file://../wrappers/bob.bio.base/algorithm/pca/pca_projection"
 
+
+
+#############
+# ENROLL
+############
+
+enroll_dict = snakemake_db.get_enroll_dict("projected", "models",
+                                           ".hdf5", ".hdf5")
+
+wildcard_constraints:
+    enroll_wc = snakemake_db.get_enroll_wildcard()
+
+# HANDLING I/O
+rule enroll_all:
+    input:
+        expand("{enroll_wc}", enroll_wc=enroll_dict.keys())
+        
+
+rule ENROLL:
+    input:
+        input_files = lambda wc: enroll_dict[wc.enroll_wc]
+    output:
+        output_file = '{enroll_wc}'
+    params:
+        pca_dim = config["pca_dim"]
+    wrapper:
+        # define the projector
+        #
+        "file://../wrappers/bob.bio.base/algorithm/pca/pca_enroll"
+
+
+#############
+# SCORE
+############
+
+score_dict, model_id_dict = snakemake_db.get_score_dict("models", "scores",
+                                                         ".hdf5", ".txt")
+
+wildcard_constraints:
+    score_wc = snakemake_db.get_score_wildcard()
+
+# HANDLING I/O
+rule score_all:
+    input:
+        expand("{score_wc}", score_wc=score_dict.keys())
+
+rule SCORE:
+    input:
+        input_file  = lambda wc: score_dict[wc.score_wc],
+        probe_files = snakemake_db.get_probes("projected", ".hdf5")
+    output:
+        output_file = '{score_wc}'
+    params:
+        pca_dim = config["pca_dim"],
+        model_ids = model_id_dict,
+        probe_file_ids = snakemake_db.get_probes_model_id("projected", ".hdf5")
+    wrapper:
+        # define the projector
+        #
+        "file://../wrappers/bob.bio.base/algorithm/pca/pca_score"
+
+
+###
+#ALL
+##
+
+rule all:
+    input: 
+        input_file = score_dict.keys()
+    output:
+        output_file=f'scores-dev'
+    run:
+        # CONCATENATING
+        f = open(output.output_file, 'w')
+        for i in input.input_file:
+            f.write(open(i).read())
