@@ -69,7 +69,7 @@ The **first** main drawback is the way that parallelization is handled.
 Data parallelization in snakemake is handled with wildcards and with respect to this feature, there are two major things that can create problems in the future.
  1. Intuition of such feature. Although wildcards is a powerfull feature, to craft one for our needs is not very intuitive. We would need lots of examples to make this clear to every one.
 
- 2. The **second** issue is about efficiency. As soon as you have a match (regular expression match) using wildcards, snakemake creates a `Job`. If you have 1000 matches, you'll have 1000 jobs and if your job has some overhead (like loading a heavy model) this can be very inneficient. Would be nice to be able to approach it like `bob.bio.base` does.
+ 2. Efficiency. As soon as you have a match (regular expression match) using wildcards, snakemake creates a `Job`. If you have 1000 matches, you'll have 1000 jobs and if your job has some overhead (like loading a heavy model) this can be very inneficient. Would be nice to be able to approach it like `bob.bio.base` does.
 
 The **second** main drawback is the way inputs and output are handled.
 Everything is "path" based.
