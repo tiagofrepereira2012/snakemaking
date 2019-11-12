@@ -1,0 +1,33 @@
+import numpy
+
+workdir: "test"
+
+def DO_SOMETHING_AND_SAVE(input_file, output_file):
+    """
+    Adding this function here just for the sake of simplicity.
+    Here I will simulated a job with an overhead
+    """
+    
+    print(f"RUNNING MY VERY DEMANDING JOB with {input_file}")
+    open(output_file, 'w').write("\n")
+
+
+TRAIN_DATA = ['a.txt', 'b.txt', 'c.txt']
+OUTPUT_DATA = ['a.out', 'b.out', 'c.out']
+
+files= dict(zip(OUTPUT_DATA, TRAIN_DATA))
+
+wildcard_constraints:
+    x= '|'.join([re.escape(x) for x in OUTPUT_DATA])
+
+rule all:
+    input:
+        expand('{x}', x= OUTPUT_DATA),
+
+rule MY_RULE:
+    input:
+        input_file= lambda wc: files[wc.x]
+    output:
+        output_file= '{x}'
+    run:        
+        DO_SOMETHING_AND_SAVE(input.input_file, output.output_file)
