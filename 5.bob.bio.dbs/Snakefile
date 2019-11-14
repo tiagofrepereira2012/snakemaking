@@ -120,7 +120,7 @@ rule PROJECT:
     wrapper:
         # define the projector
         #
-        "file://../wrappers/bob.bio.base/algorithm/pca/pca_projection"
+        "file://../wrappers/bob.bio.base/algorithm/pca/pca_projection/"
 
 
 

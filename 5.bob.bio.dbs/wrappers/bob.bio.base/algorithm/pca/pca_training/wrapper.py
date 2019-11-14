@@ -1,6 +1,7 @@
 import bob.bio.base
 import numpy
 
+
 algorithm = bob.bio.base.algorithm.PCA(subspace_dimension=snakemake.params.pca_dim)
 
 ################

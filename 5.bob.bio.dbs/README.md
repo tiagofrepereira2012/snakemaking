@@ -74,6 +74,7 @@ Data parallelization in snakemake is handled with wildcards and with respect to 
 The **second** main drawback is the way inputs and output are handled.
 Everything is "path" based.
 For instance, it's not possible to send a "samples" to a rule.
+We could branch Snakemake.rules to introduce the concept of sample.
 A sample could be anything, such as, numpy.arrays, pandas data frames, and many other things.
 This would make snakemake more robust.
 

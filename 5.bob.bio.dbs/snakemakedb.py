@@ -5,7 +5,13 @@
 
 class SnakemakeDb(object):
     """
-    Map bob.db databases to the snakefile files
+    Map bob.db databases to the snakemake pipelines.
+    
+    This class maps input/outputs for each step in a recognition pipeline as well as
+    with their corresponding wildcars.
+
+    TODO: This could be simplified by having only one dictionary and the
+    Snakefile takes care herself to orchestrate the dataflow. To be defined
     """
 
     def __init__(self, db, groups=["dev"]):
