@@ -1,0 +1,3 @@
+database_path: "/idiap/group/biometric/databases/biometrics/face2D/orl/"
+database_extension: ".pgm"
+pca_dim: 0.95
