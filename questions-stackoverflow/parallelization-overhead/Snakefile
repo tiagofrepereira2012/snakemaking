@@ -29,5 +29,5 @@ rule MY_RULE:
         input_file= lambda wc: files[wc.x]
     output:
         output_file= '{x}'
-    run:        
+    run: 
         DO_SOMETHING_AND_SAVE(input.input_file, output.output_file)

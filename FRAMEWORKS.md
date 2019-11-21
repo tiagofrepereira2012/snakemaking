@@ -48,11 +48,34 @@ We have looked some tools and follow bellow a longitudinal analysis of some:
 
 | Tool                 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
 |:--------------------:|---|---|---|---|---|---|---|---|---|
-| Snakemake            | Y | C | Y | N | Y | Y | Y | C | Y |
+| Snakemake            | Y | C | Y | N | Y | Y | Y | C | C |
 | Luigi                | Y | N | N | ? | Y | Y | C | ? | ? |
-| Kedro                | Y | ? | ? | ? | ? | Y | ? | ? | N |
+| Kedro                | Y | N | N | Y | C | C | Y | C | N |
+| Parsl                |   |   |   |   |   |   |   |   |   |
 
 **Y** stands for yes, **C** stands for yes, but with some constraints and **N** for no.
 
 
+
+
+## Subjective analisys
+
+### Snakemake
+
+### Luigi
+
+### Kedro
+
+It seems that kedro is better made.
+It has a nice I/O isolation.
+
+, but with several level of complications
+
+
+https://github.com/quantumblacklabs/kedro/issues/123
+
+It's not very sample oriented
+
+
+DEPENDENCIES VIA KEYWORDS
 
