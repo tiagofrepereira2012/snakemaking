@@ -79,3 +79,13 @@ It's not very sample oriented
 
 DEPENDENCIES VIA KEYWORDS
 
+
+### Parl
+
+
+
+Can I pass any Python object between apps?
+
+No. Unfortunately, only picklable objects can be passed between apps. For objects that can’t be pickled, it is recommended to use object specific methods to write the object into a file and use files to communicate between apps.
+
+

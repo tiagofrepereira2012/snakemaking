@@ -13,7 +13,7 @@ import numpy
 ##print(config)
 #parsl.load(config)
 
-THREADS = 100
+THREADS = 1
 
 config= Config(executors=[ThreadPoolExecutor(max_threads=THREADS,
                                  label='local_threads')])
@@ -24,7 +24,7 @@ parsl.load(config)
 @python_app
 def pi(num_points):
     from random import random
-
+    #import ipdb; ipdb.set_trace()
     inside = 0
     for i in range(num_points):
         x, y = random(), random()  # Drop a random point in the box.
@@ -47,5 +47,5 @@ mean_pi  = mean(*numbers)
 
 # Print the results
 #print("a: {:.5f} b: {:.5f} c: {:.5f}".format(a.result(), b.result(), c.result()))
-#import ipdb; ipdb.set_trace()
+import ipdb; ipdb.set_trace()
 print("Average: {:.5f}".format(mean_pi.result()))
