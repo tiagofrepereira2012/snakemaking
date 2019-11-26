@@ -1,0 +1,27 @@
+#!/bin/bash
+#$ -S /bin/bash
+#$ -o /remote/idiap.svm/user.active/tpereira/github/snakemaking/parsl/workflows/runinfo/000/submit_scripts/parsl.auto.1574785760.8144062.submit.stdout
+#$ -e /remote/idiap.svm/user.active/tpereira/github/snakemaking/parsl/workflows/runinfo/000/submit_scripts/parsl.auto.1574785760.8144062.submit.stderr
+#$ -cwd
+#$ -l h_rt=10
+
+
+source /idiap/user/tpereira/conda/bin/activate /idiap/user/tpereira/conda/envs/snakemaking
+
+export JOBNAME="parsl.auto.1574785760.8144062"
+
+export CORES=$(getconf _NPROCESSORS_ONLN)
+echo "Found cores : $CORES"
+WORKERCOUNT=1
+
+CMD ( ) {
+process_worker_pool.py   -p 0 -c 1.0 -m None --poll 10 --task_url=tcp://153.109.180.145:54824 --result_url=tcp://153.109.180.145:54061 --logdir=/remote/idiap.svm/user.active/tpereira/github/snakemaking/parsl/workflows/runinfo/000/local_threads --block_id=2 --hb_period=30 --hb_threshold=120 
+}
+for COUNT in $(seq 1 1 $WORKERCOUNT)
+do
+    echo "Launching worker: $COUNT"
+    CMD &
+done
+wait
+echo "All workers done"
+
