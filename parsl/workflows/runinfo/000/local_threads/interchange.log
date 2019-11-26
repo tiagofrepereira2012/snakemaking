@@ -1,0 +1,6 @@
+2019-11-26 17:29:19.642 interchange:155 [INFO]  Attempting connection to client at 127.0.0.1 on ports: 55456,55932,55987
+2019-11-26 17:29:19.643 interchange:168 [INFO]  Connected to client
+2019-11-26 17:29:19.644 interchange:204 [INFO]  Bound to ports 54824,54061 for incoming worker connections
+2019-11-26 17:29:19.644 interchange:218 [INFO]  Platform info: {'parsl_v': '0.9.0', 'python_v': '3.6.9', 'os': 'Linux', 'hostname': 'italix29', 'dir': '/remote/idiap.svm/user.active/tpereira/github/snakemaking/parsl/workflows'}
+2019-11-26 17:29:19.645 interchange:336 [INFO]  Incoming ports bound
+2019-11-26 17:29:19.646 interchange:253 [INFO]  [TASK_PULL_THREAD] Starting

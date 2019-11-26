@@ -1,0 +1,18 @@
+2019-11-26 17:29:37.802 parsl:592 Rank:0 [INFO]  Python version: 3.6.9 |Anaconda, Inc.| (default, Jul 30 2019, 19:07:31) 
+[GCC 7.3.0]
+2019-11-26 17:29:37.803 parsl:593 Rank:0 [INFO]  Debug logging: False
+2019-11-26 17:29:37.803 parsl:594 Rank:0 [INFO]  Log dir: /remote/idiap.svm/user.active/tpereira/github/snakemaking/parsl/workflows/runinfo/000/local_threads
+2019-11-26 17:29:37.803 parsl:595 Rank:0 [INFO]  Manager ID: af5c93d0274b
+2019-11-26 17:29:37.803 parsl:596 Rank:0 [INFO]  Block ID: 6
+2019-11-26 17:29:37.803 parsl:597 Rank:0 [INFO]  cores_per_worker: 1.0
+2019-11-26 17:29:37.803 parsl:598 Rank:0 [INFO]  mem_per_worker: None
+2019-11-26 17:29:37.803 parsl:599 Rank:0 [INFO]  task_url: tcp://153.109.180.145:54824
+2019-11-26 17:29:37.803 parsl:600 Rank:0 [INFO]  result_url: tcp://153.109.180.145:54061
+2019-11-26 17:29:37.803 parsl:601 Rank:0 [INFO]  max_workers: inf
+2019-11-26 17:29:37.803 parsl:602 Rank:0 [INFO]  poll_period: 10
+2019-11-26 17:29:37.803 parsl:603 Rank:0 [INFO]  Prefetch capacity: 0
+2019-11-26 17:29:37.803 parsl:108 Rank:0 [INFO]  Manager started
+2019-11-26 17:29:37.804 parsl:122 Rank:0 [INFO]  Manager connected
+2019-11-26 17:29:37.804 parsl:148 Rank:0 [INFO]  Manager will spawn 6 workers
+2019-11-26 17:29:37.845 parsl:199 Rank:0 [INFO]  [TASK PULL THREAD] starting
+2019-11-26 17:29:37.852 parsl:385 Rank:0 [INFO]  Loop start

@@ -1,0 +1,189 @@
+2019-11-26 17:29:19.412 parsl.dataflow.dflow:83 [DEBUG]  Starting DataFlowKernel with config
+Config(
+    app_cache=True, 
+    checkpoint_files=None, 
+    checkpoint_mode=None, 
+    checkpoint_period=None, 
+    data_management_max_threads=10, 
+    executors=[HighThroughputExecutor(
+        address='153.109.180.145', 
+        cores_per_worker=1.0, 
+        heartbeat_period=30, 
+        heartbeat_threshold=120, 
+        interchange_port_range=(55000, 56000), 
+        label='local_threads', 
+        launch_cmd='process_worker_pool.py {debug} {max_workers} -p {prefetch_capacity} -c {cores_per_worker} -m {mem_per_worker} --poll {poll_period} --task_url={task_url} --result_url={result_url} --logdir={logdir} --block_id={{block_id}} --hb_period={heartbeat_period} --hb_threshold={heartbeat_threshold} ', 
+        managed=True, 
+        max_workers=inf, 
+        mem_per_worker=None, 
+        poll_period=10, 
+        prefetch_capacity=0, 
+        provider=GridEngineProvider(
+            channel=LocalChannel(
+                envs={}, 
+                script_dir=None, 
+                userhome='/remote/idiap.svm/user.active/tpereira/github/snakemaking/parsl/workflows'
+            ), 
+            init_blocks=1, 
+            launcher=SingleNodeLauncher(), 
+            max_blocks=10, 
+            min_blocks=0, 
+            nodes_per_block=1, 
+            parallelism=1, 
+            scheduler_options='', 
+            walltime='00:10:00', 
+            worker_init='source /idiap/user/tpereira/conda/bin/activate /idiap/user/tpereira/conda/envs/snakemaking'
+        ), 
+        storage_access=None, 
+        suppress_failure=True, 
+        worker_debug=False, 
+        worker_logdir_root=None, 
+        worker_port_range=(54000, 55000), 
+        worker_ports=None, 
+        working_dir=None
+    )], 
+    initialize_logging=True, 
+    lazy_errors=True, 
+    max_idletime=120.0, 
+    monitoring=None, 
+    retries=0, 
+    run_dir='runinfo', 
+    strategy='simple', 
+    usage_tracking=False
+)
+2019-11-26 17:29:19.412 parsl.dataflow.dflow:84 [INFO]  Parsl version: 0.9.0
+2019-11-26 17:29:19.412 parsl.dataflow.usage_tracking.usage:126 [DEBUG]  Tracking status: False
+2019-11-26 17:29:19.412 parsl.dataflow.usage_tracking.usage:127 [DEBUG]  Testing mode   : False
+2019-11-26 17:29:19.413 parsl.dataflow.dflow:110 [INFO]  Run id is: 3495f8a0-ea8d-4e19-841b-52e4e77c02b2
+2019-11-26 17:29:19.631 parsl.dataflow.memoization:52 [INFO]  App caching initialized
+2019-11-26 17:29:19.633 parsl.executors.high_throughput.executor:453 [DEBUG]  Starting queue management thread
+2019-11-26 17:29:19.633 parsl.executors.high_throughput.executor:326 [DEBUG]  [MTHREAD] queue management worker starting
+2019-11-26 17:29:19.633 parsl.executors.high_throughput.executor:457 [DEBUG]  Started queue management thread
+2019-11-26 17:29:19.646 parsl.executors.high_throughput.executor:289 [DEBUG]  Created management thread: <Thread(HTEX-Queue-Management-Thread, started daemon 140338422724352)>
+2019-11-26 17:29:19.646 parsl.executors.high_throughput.executor:263 [DEBUG]  Launch command: process_worker_pool.py   -p 0 -c 1.0 -m None --poll 10 --task_url=tcp://153.109.180.145:54824 --result_url=tcp://153.109.180.145:54061 --logdir=/remote/idiap.svm/user.active/tpereira/github/snakemaking/parsl/workflows/runinfo/000/local_threads --block_id={block_id} --hb_period=30 --hb_threshold=120 
+2019-11-26 17:29:19.646 parsl.executors.high_throughput.executor:266 [DEBUG]  Starting HighThroughputExecutor with provider:
+GridEngineProvider(
+    channel=LocalChannel(
+        envs={}, 
+        script_dir='/remote/idiap.svm/user.active/tpereira/github/snakemaking/parsl/workflows/runinfo/000/submit_scripts', 
+        userhome='/remote/idiap.svm/user.active/tpereira/github/snakemaking/parsl/workflows'
+    ), 
+    init_blocks=1, 
+    launcher=SingleNodeLauncher(), 
+    max_blocks=10, 
+    min_blocks=0, 
+    nodes_per_block=1, 
+    parallelism=1, 
+    scheduler_options='', 
+    walltime='00:10:00', 
+    worker_init='source /idiap/user/tpereira/conda/bin/activate /idiap/user/tpereira/conda/envs/snakemaking'
+)
+2019-11-26 17:29:19.652 parsl.providers.grid_engine.grid_engine:96 [DEBUG]  Requesting one block with 1 nodes per block and 1 tasks per node
+2019-11-26 17:29:19.652 parsl.providers.grid_engine.grid_engine:139 [DEBUG]  Writing submit script
+2019-11-26 17:29:19.692 parsl.executors.high_throughput.executor:569 [DEBUG]  Launched block 0->1064680
+2019-11-26 17:29:19.693 parsl.dataflow.strategy:125 [DEBUG]  Scaling strategy: simple
+2019-11-26 17:29:19.699 parsl.dataflow.dflow:484 [DEBUG]  Adding output dependencies
+2019-11-26 17:29:19.699 parsl.dataflow.dflow:708 [INFO]  Task 0 submitted for App pi, waiting on tasks []
+2019-11-26 17:29:19.700 parsl.dataflow.dflow:714 [DEBUG]  Task 0 set to pending state with AppFuture: <AppFuture super=<AppFuture at 0x7fa31551e438 state=pending>>
+2019-11-26 17:29:19.700 parsl.executors.high_throughput.executor:537 [DEBUG]  Pushing function <function pi at 0x7fa318d9fd08> to queue with args (1000000,)
+2019-11-26 17:29:19.701 parsl.dataflow.dflow:452 [INFO]  Task 0 launched on executor local_threads
+2019-11-26 17:29:19.701 parsl.dataflow.dflow:484 [DEBUG]  Adding output dependencies
+2019-11-26 17:29:19.701 parsl.dataflow.dflow:708 [INFO]  Task 1 submitted for App pi, waiting on tasks []
+2019-11-26 17:29:19.701 parsl.dataflow.dflow:714 [DEBUG]  Task 1 set to pending state with AppFuture: <AppFuture super=<AppFuture at 0x7fa31551e898 state=pending>>
+2019-11-26 17:29:19.701 parsl.executors.high_throughput.executor:537 [DEBUG]  Pushing function <function pi at 0x7fa318d9fd08> to queue with args (1000000,)
+2019-11-26 17:29:19.702 parsl.dataflow.dflow:452 [INFO]  Task 1 launched on executor local_threads
+2019-11-26 17:29:19.702 parsl.dataflow.dflow:484 [DEBUG]  Adding output dependencies
+2019-11-26 17:29:19.702 parsl.dataflow.dflow:708 [INFO]  Task 2 submitted for App pi, waiting on tasks []
+2019-11-26 17:29:19.702 parsl.dataflow.dflow:714 [DEBUG]  Task 2 set to pending state with AppFuture: <AppFuture super=<AppFuture at 0x7fa31551eb00 state=pending>>
+2019-11-26 17:29:19.702 parsl.executors.high_throughput.executor:537 [DEBUG]  Pushing function <function pi at 0x7fa318d9fd08> to queue with args (1000000,)
+2019-11-26 17:29:19.703 parsl.dataflow.dflow:452 [INFO]  Task 2 launched on executor local_threads
+2019-11-26 17:29:19.703 parsl.dataflow.dflow:484 [DEBUG]  Adding output dependencies
+2019-11-26 17:29:19.703 parsl.dataflow.dflow:708 [INFO]  Task 3 submitted for App pi, waiting on tasks []
+2019-11-26 17:29:19.703 parsl.dataflow.dflow:714 [DEBUG]  Task 3 set to pending state with AppFuture: <AppFuture super=<AppFuture at 0x7fa31551ec50 state=pending>>
+2019-11-26 17:29:19.703 parsl.executors.high_throughput.executor:537 [DEBUG]  Pushing function <function pi at 0x7fa318d9fd08> to queue with args (1000000,)
+2019-11-26 17:29:19.704 parsl.dataflow.dflow:452 [INFO]  Task 3 launched on executor local_threads
+2019-11-26 17:29:19.704 parsl.dataflow.dflow:484 [DEBUG]  Adding output dependencies
+2019-11-26 17:29:19.704 parsl.dataflow.dflow:708 [INFO]  Task 4 submitted for App pi, waiting on tasks []
+2019-11-26 17:29:19.704 parsl.dataflow.dflow:714 [DEBUG]  Task 4 set to pending state with AppFuture: <AppFuture super=<AppFuture at 0x7fa31551eda0 state=pending>>
+2019-11-26 17:29:19.704 parsl.executors.high_throughput.executor:537 [DEBUG]  Pushing function <function pi at 0x7fa318d9fd08> to queue with args (1000000,)
+2019-11-26 17:29:19.705 parsl.dataflow.dflow:452 [INFO]  Task 4 launched on executor local_threads
+2019-11-26 17:29:19.705 parsl.dataflow.dflow:484 [DEBUG]  Adding output dependencies
+2019-11-26 17:29:19.705 parsl.dataflow.dflow:708 [INFO]  Task 5 submitted for App pi, waiting on tasks []
+2019-11-26 17:29:19.705 parsl.dataflow.dflow:714 [DEBUG]  Task 5 set to pending state with AppFuture: <AppFuture super=<AppFuture at 0x7fa31551eef0 state=pending>>
+2019-11-26 17:29:19.705 parsl.executors.high_throughput.executor:537 [DEBUG]  Pushing function <function pi at 0x7fa318d9fd08> to queue with args (1000000,)
+2019-11-26 17:29:19.706 parsl.dataflow.dflow:452 [INFO]  Task 5 launched on executor local_threads
+2019-11-26 17:29:19.706 parsl.dataflow.dflow:484 [DEBUG]  Adding output dependencies
+2019-11-26 17:29:19.706 parsl.dataflow.dflow:708 [INFO]  Task 6 submitted for App pi, waiting on tasks []
+2019-11-26 17:29:19.706 parsl.dataflow.dflow:714 [DEBUG]  Task 6 set to pending state with AppFuture: <AppFuture super=<AppFuture at 0x7fa315530080 state=pending>>
+2019-11-26 17:29:19.706 parsl.executors.high_throughput.executor:537 [DEBUG]  Pushing function <function pi at 0x7fa318d9fd08> to queue with args (1000000,)
+2019-11-26 17:29:19.707 parsl.dataflow.dflow:452 [INFO]  Task 6 launched on executor local_threads
+2019-11-26 17:29:19.707 parsl.dataflow.dflow:484 [DEBUG]  Adding output dependencies
+2019-11-26 17:29:19.707 parsl.dataflow.dflow:708 [INFO]  Task 7 submitted for App pi, waiting on tasks []
+2019-11-26 17:29:19.707 parsl.dataflow.dflow:714 [DEBUG]  Task 7 set to pending state with AppFuture: <AppFuture super=<AppFuture at 0x7fa3155301d0 state=pending>>
+2019-11-26 17:29:19.707 parsl.executors.high_throughput.executor:537 [DEBUG]  Pushing function <function pi at 0x7fa318d9fd08> to queue with args (1000000,)
+2019-11-26 17:29:19.708 parsl.dataflow.dflow:452 [INFO]  Task 7 launched on executor local_threads
+2019-11-26 17:29:19.708 parsl.dataflow.dflow:484 [DEBUG]  Adding output dependencies
+2019-11-26 17:29:19.708 parsl.dataflow.dflow:708 [INFO]  Task 8 submitted for App mean, waiting on tasks [0, 1, 2, 3, 4, 5, 6, 7]
+2019-11-26 17:29:19.708 parsl.dataflow.dflow:714 [DEBUG]  Task 8 set to pending state with AppFuture: <AppFuture super=<AppFuture at 0x7fa315530320 state=pending>>
+2019-11-26 17:29:20.771 parsl.dataflow.strategy:200 [DEBUG]  Executor local_threads has 8 active tasks, 0/0/1 running/submitted/pending blocks, and 0 connected workers
+2019-11-26 17:29:20.772 parsl.dataflow.strategy:259 [DEBUG]  Requesting 7 more blocks
+2019-11-26 17:29:20.772 parsl.providers.grid_engine.grid_engine:96 [DEBUG]  Requesting one block with 1 nodes per block and 1 tasks per node
+2019-11-26 17:29:20.772 parsl.providers.grid_engine.grid_engine:139 [DEBUG]  Writing submit script
+2019-11-26 17:29:20.814 parsl.executors.high_throughput.executor:569 [DEBUG]  Launched block 1->1064681
+2019-11-26 17:29:20.814 parsl.providers.grid_engine.grid_engine:96 [DEBUG]  Requesting one block with 1 nodes per block and 1 tasks per node
+2019-11-26 17:29:20.814 parsl.providers.grid_engine.grid_engine:139 [DEBUG]  Writing submit script
+2019-11-26 17:29:20.855 parsl.executors.high_throughput.executor:569 [DEBUG]  Launched block 2->1064682
+2019-11-26 17:29:20.855 parsl.providers.grid_engine.grid_engine:96 [DEBUG]  Requesting one block with 1 nodes per block and 1 tasks per node
+2019-11-26 17:29:20.856 parsl.providers.grid_engine.grid_engine:139 [DEBUG]  Writing submit script
+2019-11-26 17:29:20.896 parsl.executors.high_throughput.executor:569 [DEBUG]  Launched block 3->1064683
+2019-11-26 17:29:20.897 parsl.providers.grid_engine.grid_engine:96 [DEBUG]  Requesting one block with 1 nodes per block and 1 tasks per node
+2019-11-26 17:29:20.897 parsl.providers.grid_engine.grid_engine:139 [DEBUG]  Writing submit script
+2019-11-26 17:29:20.938 parsl.executors.high_throughput.executor:569 [DEBUG]  Launched block 4->1064684
+2019-11-26 17:29:20.938 parsl.providers.grid_engine.grid_engine:96 [DEBUG]  Requesting one block with 1 nodes per block and 1 tasks per node
+2019-11-26 17:29:20.939 parsl.providers.grid_engine.grid_engine:139 [DEBUG]  Writing submit script
+2019-11-26 17:29:20.980 parsl.executors.high_throughput.executor:569 [DEBUG]  Launched block 5->1064685
+2019-11-26 17:29:20.980 parsl.providers.grid_engine.grid_engine:96 [DEBUG]  Requesting one block with 1 nodes per block and 1 tasks per node
+2019-11-26 17:29:20.980 parsl.providers.grid_engine.grid_engine:139 [DEBUG]  Writing submit script
+2019-11-26 17:29:21.021 parsl.executors.high_throughput.executor:569 [DEBUG]  Launched block 6->1064686
+2019-11-26 17:29:21.022 parsl.providers.grid_engine.grid_engine:96 [DEBUG]  Requesting one block with 1 nodes per block and 1 tasks per node
+2019-11-26 17:29:21.022 parsl.providers.grid_engine.grid_engine:139 [DEBUG]  Writing submit script
+2019-11-26 17:29:21.063 parsl.executors.high_throughput.executor:569 [DEBUG]  Launched block 7->1064687
+2019-11-26 17:29:25.768 parsl.dataflow.strategy:200 [DEBUG]  Executor local_threads has 8 active tasks, 0/0/8 running/submitted/pending blocks, and 0 connected workers
+2019-11-26 17:29:30.765 parsl.dataflow.strategy:200 [DEBUG]  Executor local_threads has 8 active tasks, 0/0/8 running/submitted/pending blocks, and 0 connected workers
+2019-11-26 17:29:35.767 parsl.dataflow.strategy:200 [DEBUG]  Executor local_threads has 8 active tasks, 8/0/0 running/submitted/pending blocks, and 0 connected workers
+2019-11-26 17:29:40.768 parsl.dataflow.strategy:200 [DEBUG]  Executor local_threads has 8 active tasks, 8/0/0 running/submitted/pending blocks, and 0 connected workers
+2019-11-26 17:29:45.818 parsl.dataflow.strategy:200 [DEBUG]  Executor local_threads has 8 active tasks, 8/0/0 running/submitted/pending blocks, and 0 connected workers
+2019-11-26 17:29:50.769 parsl.dataflow.strategy:200 [DEBUG]  Executor local_threads has 8 active tasks, 0/0/0 running/submitted/pending blocks, and 0 connected workers
+2019-11-26 17:29:50.769 parsl.dataflow.strategy:259 [DEBUG]  Requesting 8 more blocks
+2019-11-26 17:29:50.770 parsl.providers.grid_engine.grid_engine:96 [DEBUG]  Requesting one block with 1 nodes per block and 1 tasks per node
+2019-11-26 17:29:50.770 parsl.providers.grid_engine.grid_engine:139 [DEBUG]  Writing submit script
+2019-11-26 17:29:50.812 parsl.executors.high_throughput.executor:569 [DEBUG]  Launched block 8->1064689
+2019-11-26 17:29:50.812 parsl.providers.grid_engine.grid_engine:96 [DEBUG]  Requesting one block with 1 nodes per block and 1 tasks per node
+2019-11-26 17:29:50.812 parsl.providers.grid_engine.grid_engine:139 [DEBUG]  Writing submit script
+2019-11-26 17:29:50.853 parsl.executors.high_throughput.executor:569 [DEBUG]  Launched block 9->1064690
+2019-11-26 17:29:50.854 parsl.providers.grid_engine.grid_engine:96 [DEBUG]  Requesting one block with 1 nodes per block and 1 tasks per node
+2019-11-26 17:29:50.854 parsl.providers.grid_engine.grid_engine:139 [DEBUG]  Writing submit script
+2019-11-26 17:29:50.894 parsl.executors.high_throughput.executor:569 [DEBUG]  Launched block 10->1064691
+2019-11-26 17:29:50.895 parsl.providers.grid_engine.grid_engine:96 [DEBUG]  Requesting one block with 1 nodes per block and 1 tasks per node
+2019-11-26 17:29:50.895 parsl.providers.grid_engine.grid_engine:139 [DEBUG]  Writing submit script
+2019-11-26 17:29:50.936 parsl.executors.high_throughput.executor:569 [DEBUG]  Launched block 11->1064692
+2019-11-26 17:29:50.936 parsl.providers.grid_engine.grid_engine:96 [DEBUG]  Requesting one block with 1 nodes per block and 1 tasks per node
+2019-11-26 17:29:50.936 parsl.providers.grid_engine.grid_engine:139 [DEBUG]  Writing submit script
+2019-11-26 17:29:50.977 parsl.executors.high_throughput.executor:569 [DEBUG]  Launched block 12->1064693
+2019-11-26 17:29:50.978 parsl.providers.grid_engine.grid_engine:96 [DEBUG]  Requesting one block with 1 nodes per block and 1 tasks per node
+2019-11-26 17:29:50.978 parsl.providers.grid_engine.grid_engine:139 [DEBUG]  Writing submit script
+2019-11-26 17:29:51.019 parsl.executors.high_throughput.executor:569 [DEBUG]  Launched block 13->1064694
+2019-11-26 17:29:51.020 parsl.providers.grid_engine.grid_engine:96 [DEBUG]  Requesting one block with 1 nodes per block and 1 tasks per node
+2019-11-26 17:29:51.020 parsl.providers.grid_engine.grid_engine:139 [DEBUG]  Writing submit script
+2019-11-26 17:29:51.061 parsl.executors.high_throughput.executor:569 [DEBUG]  Launched block 14->1064695
+2019-11-26 17:29:51.061 parsl.providers.grid_engine.grid_engine:96 [DEBUG]  Requesting one block with 1 nodes per block and 1 tasks per node
+2019-11-26 17:29:51.061 parsl.providers.grid_engine.grid_engine:139 [DEBUG]  Writing submit script
+2019-11-26 17:29:51.102 parsl.executors.high_throughput.executor:569 [DEBUG]  Launched block 15->1064696
+2019-11-26 17:29:55.767 parsl.dataflow.strategy:200 [DEBUG]  Executor local_threads has 8 active tasks, 0/0/8 running/submitted/pending blocks, and 0 connected workers
+2019-11-26 17:30:00.819 parsl.dataflow.strategy:200 [DEBUG]  Executor local_threads has 8 active tasks, 0/0/8 running/submitted/pending blocks, and 0 connected workers
+2019-11-26 17:30:02.164 parsl.dataflow.dflow:864 [INFO]  DFK cleanup initiated
+2019-11-26 17:30:02.165 parsl.dataflow.dflow:750 [INFO]  Summary of tasks in DFK:
+2019-11-26 17:30:02.165 parsl.dataflow.dflow:781 [INFO]  Tasks in state States.pending: 8
+2019-11-26 17:30:02.165 parsl.dataflow.dflow:781 [INFO]  Tasks in state States.launched: 0, 1, 2, 3, 4, 5, 6, 7
+2019-11-26 17:30:02.165 parsl.dataflow.dflow:788 [INFO]  End of summary
+2019-11-26 17:30:02.166 parsl.dataflow.dflow:888 [INFO]  Terminating flow_control and strategy threads
