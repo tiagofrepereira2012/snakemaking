@@ -26,7 +26,6 @@ THREADS = 8
 
 config= Config(executors=[HighThroughputExecutor(
                               label='local_threads',
-                              address=address_by_query(),
                               provider=GridEngineProvider(channel=LocalChannel(), worker_init="source /idiap/user/tpereira/conda/bin/activate /idiap/user/tpereira/conda/envs/snakemaking")
                               )])
 
