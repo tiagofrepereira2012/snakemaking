@@ -1,0 +1,24 @@
+# Simple example on how to create some rules in a snakefilie
+#
+#
+#
+
+
+rule TASKA:
+    input:
+       input_files = ['A.txt', 'B.txt']
+
+    output:
+       output_files = ['A.out', 'B.out']
+
+    run:
+       # Python code direcly
+       for i,o in zip(input.input_files, output.output_files):
+           open(o, 'w').write(f"something with my input {i}")
+
+rule all:
+    input:
+       input_files = ['A.out', 'B.out']
+
+
+
