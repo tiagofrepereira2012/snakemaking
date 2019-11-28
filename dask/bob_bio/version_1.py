@@ -168,7 +168,7 @@ extracted = []
 for i in range(NODES):
     extracted.append(client.submit(extract, preprocessed[i]))
 
-import ipdb; ipdb.set_trace()
+#import ipdb; ipdb.set_trace()
 
 # 3. BACKGROUND
 pca_model = client.submit(train_pca, extracted, db.training_files())
