@@ -15,15 +15,15 @@ NODES = 10
 
 ### LOCAL EXECUTION
 
-#client = Client(processes=False)  # start local workers as threads
+client = Client(processes=False)  # start local workers as threads
 
 ### SGE
 
-from dask_jobqueue import PBSCluster
+#from dask_jobqueue import PBSCluster
 
-cluster = PBSCluster(cores=2, memory="4GB", queue="all.q")
-cluster.scale(NODES)
-client = Client(cluster)
+#cluster = PBSCluster(cores=2, memory="4GB", queue="all.q")
+#cluster.scale(NODES)
+#client = Client(cluster)
 
 
 import bob.bio.face
@@ -167,6 +167,8 @@ for i in range(NODES):
 extracted = []
 for i in range(NODES):
     extracted.append(client.submit(extract, preprocessed[i]))
+
+import ipdb; ipdb.set_trace()
 
 # 3. BACKGROUND
 pca_model = client.submit(train_pca, extracted, db.training_files())
