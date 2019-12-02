@@ -3,180 +3,179 @@
 ########
 
 import os
-from dask.distributed import Client
+from dask.distributed import Client, LocalCluster
 import string
 import numpy
 
 from random import randint
 from time import sleep
+from utils import read_biofiles
 
-NODES = 10
+
+
+NODES = 1
 
 
 ### LOCAL EXECUTION
 
-client = Client(processes=False)  # start local workers as threads
+cluster = LocalCluster(nanny=False, processes=False)
+client = Client(cluster)  # start local workers as threads
 
 ### SGE
 
 #from dask_jobqueue import PBSCluster
-
 #cluster = PBSCluster(cores=2, memory="4GB", queue="all.q")
 #cluster.scale(NODES)
 #client = Client(cluster)
 
 
+experiment_path = "/idiap/user/tpereira/github/snakemaking/dask/bob_bio/test/"
+database_path = "/idiap/group/biometric/databases/biometrics/face2D/orl/"
+database_extension = ".pgm"
+
 import bob.bio.face
-db = bob.bio.face.database.AtntBioDatabase()
+db = bob.bio.face.database.AtntBioDatabase(original_directory=database_path,
+                                           original_extension=database_extension)
 
 
-def to_dict(machine):
+
+def read_bobbiodata(file_name):
+    return bob.io.base.load(file_name)
+
+def write_bobbiodata(data, file_name):
+    bob.io.base.save(data, file_name)
+
+
+
+def process_bobbiofile(input_data=[],
+                       processor=None,
+                       output_path=None,
+                       output_extension=".hdf5",
+                       raw_data=True):
     """
-    Dumps its content to a :py:class:`dict`
-    
-    **Returns**
-      A :py:class:`dict` with :py:class:`bob.learn.linear.Machine` variables
-      
+    Given a list of BioFiles:
+      1. Load
+      2. Process
+      3. Save
     """
-    
-    output_dict = dict()
-    output_dict["input_sub"] = machine.input_subtract
-    output_dict["input_div"] = machine.input_divide
-    output_dict["weights"] = machine.weights
-    output_dict["activation"] = "Activation.Linear"
-    output_dict["biases"] = machine.biases
+    for f in input_data:
 
-    return output_dict
-
-def from_dict(input_dict):
-    """
-    Loads itself from a python dict :py:class:`dict`
-    
-    **Parameters**
-
-      input_dict: :py:class:`dict` to be imported
-         Dictionary with the machine
-    """
-    import bob.learn.activation
-    import bob.learn.linear
-    
-    machine = bob.learn.linear.Machine(numpy.array(input_dict["weights"], dtype="float"))
-    machine.biases = numpy.array(input_dict["biases"], dtype="float")
-    machine.input_subtract = numpy.array(input_dict["input_sub"], dtype="float")
-    machine.input_divide = numpy.array(input_dict["input_div"], dtype="float")
-
-    activation = bob.learn.activation.Linear()
-
-    machine.activation = activation
-
-    return machine
-
-
-
-
-def preprocess(inputs=[]):
-    database_path = "/idiap/group/biometric/databases/biometrics/face2D/orl/"
-    database_extension = ".pgm"
-
-    import bob.bio.face
-    import bob.io.base
-    import numpy 
-    preprocessor = bob.bio.face.preprocessor.Base(color_channel="gray",
-                                                  dtype = numpy.float64)
-
-    outputs = dict()
-    for i in inputs:
-          
-        data = i.load(database_path, database_extension)
-        preprocessed = preprocessor(data)
-        outputs[i.make_path()] = preprocessed
-
-    return outputs
-
-
-def extract(inputs):
-
-    import bob.bio.base
-    import bob.io.base
-        
-    extractor = bob.bio.base.extractor.Linearize()
-    outputs = dict()
-    for i in inputs:
-            
-        data = inputs[i]
-        extracted = extractor(data)
-        outputs[i] = extracted
+        # Defining Input/Output
+        input_file  = f.make_path(f.current_directory, f.current_extension)
+        output_file = f.make_path(output_path, output_extension)
    
-    return outputs
-
-
-def extract(inputs):
-
-    import bob.bio.base
-    import bob.io.base
+        if raw_data:
+            data = f.load(f.current_directory, f.current_extension)
+        else:
+            data = read_bobbiodata(input_file)
         
-    extractor = bob.bio.base.extractor.Linearize()
-    outputs = dict()
-    for i in inputs:
-            
-        data = inputs[i]
-        extracted = extractor(data)
-        outputs[i] = extracted
-   
-    return outputs
+        # Preprocessing
+        processed = processor(data)
+
+        # Writing       
+        bob.io.base.create_directories_safe(os.path.dirname(output_file))
+        write_bobbiodata(processed, output_file)
 
 
-def train_pca(inputs, objects_for_training):
-    ## TODO: I KNOW IT'S INNEFICIENT, SO JUST KEEP YOUR COMMENT FOR YOURSELF
+    return input_data
 
-    import bob.learn.linear
 
-    big_dict = dict()
-    for i in inputs:
-        big_dict.update(i)
+def train_bobalgorithm(input_files, algorithm, output_model):
+
+    import ipdb; ipdb.set_trace()
+
+    training_data = read_biofiles(input_files, bob.io.base.load)
     
-    first = big_dict[next(iter(big_dict.keys()))]
-    #import ipdb; ipdb.set_trace()
-    data = numpy.zeros(shape=(len(objects_for_training), first.shape[0]))
 
-    for i,o in enumerate(objects_for_training):
-        data[i] = big_dict[o.make_path()]
+    import ipdb; ipdb.set_trace()
+
+    return training_data
+
+    pass
+
+
+
+#####
+##### TODO: HACKING Working with the idea that objects should know their location
+##### 
+
+def amend_path(objects, path, extension):
+    for o in objects:
+        o.current_directory = path
+        o.current_extension = extension
+    return objects
     
-    t = bob.learn.linear.PCATrainer()
-    machine, variances = t.train(data)
-    machine.resize(machine.shape[0], 300)
 
-    return to_dict(machine)
-
+training_objects = amend_path(db.training_files(), database_path, database_extension)
+enroll_objects = amend_path(db.enroll_files(), database_path, database_extension)
+probe_objects = amend_path(db.probe_files(), database_path, database_extension)
 
 
-preproc_data = numpy.array(db.training_files() + db.enroll_files() + db.probe_files())
+input_data = training_objects + enroll_objects + probe_objects
+
+
+
 offset=0
-step = len(preproc_data)//NODES
+step = len(input_data)//NODES
 
 ####### BUILDING THE PIPELINE ########
 
 
 # 1. PREPROCESS
-preprocessed = []
+preproc_futures = []
+preprocessor = bob.bio.face.preprocessor.Base(color_channel="gray",
+                                              dtype = numpy.float64)
+
+#import ipdb; ipdb.set_trace()
+
+# Initial split
+output_path = os.path.join(experiment_path, "./preprocessed")
 for i in range(NODES):
-    preprocessed.append(client.submit(preprocess, preproc_data[offset:offset+step]))
+    preproc_futures.append(
+
+            client.submit(process_bobbiofile,
+                          input_data[offset:offset+step],
+                          preprocessor,
+                          output_path,
+                          raw_data=True
+                         )
+            )
     offset += step
 
+
 # 2. EXTRACT
-extracted = []
+extract_futures = []
+extractor = bob.bio.base.extractor.Linearize()
+output_path = os.path.join(experiment_path, "./extracted")
 for i in range(NODES):
-    extracted.append(client.submit(extract, preprocessed[i]))
+    extract_futures.append(
+            client.submit(process_bobbiofile,
+                          preproc_futures[i],
+                          extractor,
+                          output_path,
+                          raw_data=False
+                          )
+            )
+
+
+#for i in range(NODES):
+#    extract_futures[i].result()
+#    pass
 
 #import ipdb; ipdb.set_trace()
 
 # 3. BACKGROUND
-pca_model = client.submit(train_pca, extracted, db.training_files())
-serialized_machine = pca_model.result()
+from bob.bio.base.algorithm import PCA
+algorithm = PCA(0.99)
+output_model = os.path.join(experiment_path, "Projected.hdf5")
+background_model_training = client.submit(train_bobalgorithm, training_objects, algorithm, output_model)
+background_model_training.result()
 
-machine = from_dict(serialized_machine)
 
-print(machine.weights)
+#serialized_machine = pca_model.result()
+#machine = from_dict(serialized_machine)
+
+#print(machine.weights)
 
 pass
 
