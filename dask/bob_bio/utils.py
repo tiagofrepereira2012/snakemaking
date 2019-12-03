@@ -1,7 +1,7 @@
 """
 Some util functions
 """
-
+import numpy
 
 
 def read_biofiles(objects, loader, split_by_client = False, allow_missing_files = False):
@@ -35,5 +35,33 @@ def read_biofiles(objects, loader, split_by_client = False, allow_missing_files 
   if split_by_client:
       return [[extractor.read_feature(f) for f in client_files] for client_files in file_names]
   else:
-      return [loader(o.make_path(o.current_directory, o.current_extension)) for o in objects]
+      return numpy.vstack([loader(o.make_path(o.current_directory, o.current_extension)).astype("float64") for o in objects])
+
+
+
+def amend_path(objects, path, extension):
+    for o in objects:
+        o.current_directory = path
+        o.current_extension = extension
+    return objects
+
+
+
+def split_data(input_data, n_groups):
+    """
+    Given a list of elements, split them in a particular number of groups
+    This is useful for paralellization
+    """
+
+    offset=0
+    # Number of elements per groups
+    step = len(input_data)//n_groups
+
+    output_data = []
+    for i in range(n_groups):
+        output_data.append(input_data[offset:offset+step])
+        offset += step
+    
+
+    return output_data
 

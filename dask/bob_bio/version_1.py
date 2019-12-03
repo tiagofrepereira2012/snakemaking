@@ -9,16 +9,16 @@ import numpy
 
 from random import randint
 from time import sleep
-from utils import read_biofiles
-
+from utils import read_biofiles, amend_path, split_data 
+import itertools
 
 
 NODES = 1
 
 
-### LOCAL EXECUTION
+### LOCAL EXECUTION SINGLE THREAD SINGLE PROCESS
 
-cluster = LocalCluster(nanny=False, processes=False)
+cluster = LocalCluster(nanny=False, processes=False, n_workers=1, threads_per_worker=1)
 client = Client(cluster)  # start local workers as threads
 
 ### SGE
@@ -46,8 +46,7 @@ def write_bobbiodata(data, file_name):
     bob.io.base.save(data, file_name)
 
 
-
-def process_bobbiofile(input_data=[],
+def process_bobbiofile(bio_files=[],
                        processor=None,
                        output_path=None,
                        output_extension=".hdf5",
@@ -58,17 +57,26 @@ def process_bobbiofile(input_data=[],
       2. Process
       3. Save
     """
-    for f in input_data:
+    for f in bio_files:
 
         # Defining Input/Output
         input_file  = f.make_path(f.current_directory, f.current_extension)
         output_file = f.make_path(output_path, output_extension)
-   
+
+        # TODO: Make a proper check for that
+        if os.path.exists(output_file):
+            f.current_directory = output_path
+            f.current_extension = output_extension     
+            continue
+
         if raw_data:
             data = f.load(f.current_directory, f.current_extension)
         else:
             data = read_bobbiodata(input_file)
         
+        f.current_directory = output_path
+        f.current_extension = output_extension
+ 
         # Preprocessing
         processed = processor(data)
 
@@ -77,21 +85,55 @@ def process_bobbiofile(input_data=[],
         write_bobbiodata(processed, output_file)
 
 
-    return input_data
+    return bio_files
 
 
-def train_bobalgorithm(input_files, algorithm, output_model):
+def train_bobalgorithm(bio_files, algorithm, output_model):
+    import functools
+    import operator
 
-    import ipdb; ipdb.set_trace()
+    # TODO: Make a proper check for that
+    if os.path.exists(output_model):
+        return output_model
 
-    training_data = read_biofiles(input_files, bob.io.base.load)
-    
+    # Concatenating list of objects
+    merged_training_futures = functools.reduce(operator.concat, bio_files)
 
-    import ipdb; ipdb.set_trace()
+    training_data = read_biofiles(merged_training_futures, bob.io.base.load)
+    # TODO: Issue 106
+    algorithm.train_projector(training_data, output_model)
+  
+    return output_model
 
-    return training_data
 
-    pass
+def project_bobalgorithm(bio_files, algorithm, background_model, output_path, output_extension=".hdf5"):
+
+    # Loading backgroundmodel
+    algorithm.load_projector(background_model)
+
+    for f in bio_files:
+        # Defining Input/Output    
+        input_file  = f.make_path(f.current_directory, f.current_extension)
+        output_file = f.make_path(output_path, output_extension)
+
+        # TODO: Make a proper check for that
+        if os.path.exists(output_file):
+            f.current_directory = output_path
+            f.current_extension = output_extension     
+            continue
+
+        data = f.load(f.current_directory, f.current_extension)
+       
+        f.current_directory = output_path
+        f.current_extension = output_extension
+
+        projected = algorithm.project(data)
+
+        bob.io.base.create_directories_safe(os.path.dirname(output_file))
+        write_bobbiodata(projected, output_file)
+
+ 
+    return bio_files
 
 
 
@@ -99,24 +141,13 @@ def train_bobalgorithm(input_files, algorithm, output_model):
 ##### TODO: HACKING Working with the idea that objects should know their location
 ##### 
 
-def amend_path(objects, path, extension):
-    for o in objects:
-        o.current_directory = path
-        o.current_extension = extension
-    return objects
-    
 
 training_objects = amend_path(db.training_files(), database_path, database_extension)
 enroll_objects = amend_path(db.enroll_files(), database_path, database_extension)
 probe_objects = amend_path(db.probe_files(), database_path, database_extension)
 
 
-input_data = training_objects + enroll_objects + probe_objects
 
-
-
-offset=0
-step = len(input_data)//NODES
 
 ####### BUILDING THE PIPELINE ########
 
@@ -125,32 +156,79 @@ step = len(input_data)//NODES
 preproc_futures = []
 preprocessor = bob.bio.face.preprocessor.Base(color_channel="gray",
                                               dtype = numpy.float64)
+output_path = os.path.join(experiment_path, "./preprocessed")
 
-#import ipdb; ipdb.set_trace()
 
 # Initial split
-output_path = os.path.join(experiment_path, "./preprocessed")
-for i in range(NODES):
-    preproc_futures.append(
+training_objects_split = split_data(training_objects, NODES)
+enroll_objects_split = split_data(enroll_objects, NODES)
+probe_objects_split = split_data(probe_objects, NODES)
 
+preproc_training_futures = []
+preproc_enroll_futures = []
+preproc_probe_futures = []
+for t_o, e_o, p_o in zip(training_objects_split, enroll_objects_split, probe_objects_split):
+    preproc_training_futures.append(
             client.submit(process_bobbiofile,
-                          input_data[offset:offset+step],
+                          t_o,
                           preprocessor,
                           output_path,
                           raw_data=True
                          )
             )
-    offset += step
+
+    preproc_enroll_futures.append(
+            client.submit(process_bobbiofile,
+                          e_o,
+                          preprocessor,
+                          output_path,
+                          raw_data=True
+                         )
+            )
+    
+    preproc_probe_futures.append(
+            client.submit(process_bobbiofile,
+                          p_o,
+                          preprocessor,
+                          output_path,
+                          raw_data=True
+                         )
+            )
+
 
 
 # 2. EXTRACT
-extract_futures = []
+extract_training_futures = []
+extract_enroll_futures = []
+extract_probe_futures = []
+
+
 extractor = bob.bio.base.extractor.Linearize()
 output_path = os.path.join(experiment_path, "./extracted")
-for i in range(NODES):
-    extract_futures.append(
+for t_o, e_o, p_o in zip(preproc_training_futures, preproc_enroll_futures, preproc_probe_futures):
+       
+
+    extract_training_futures.append(
             client.submit(process_bobbiofile,
-                          preproc_futures[i],
+                          t_o,
+                          extractor,
+                          output_path,
+                          raw_data=False
+                          )
+            )
+
+    extract_enroll_futures.append(
+            client.submit(process_bobbiofile,
+                          e_o,
+                          extractor,
+                          output_path,
+                          raw_data=False
+                          )
+            )
+
+    extract_probe_futures.append(
+            client.submit(process_bobbiofile,
+                          p_o,
                           extractor,
                           output_path,
                           raw_data=False
@@ -158,19 +236,75 @@ for i in range(NODES):
             )
 
 
-#for i in range(NODES):
-#    extract_futures[i].result()
-#    pass
 
-#import ipdb; ipdb.set_trace()
-
-# 3. BACKGROUND
+#3. BACKGROUND MODEL TRAINING
 from bob.bio.base.algorithm import PCA
 algorithm = PCA(0.99)
-output_model = os.path.join(experiment_path, "Projected.hdf5")
-background_model_training = client.submit(train_bobalgorithm, training_objects, algorithm, output_model)
-background_model_training.result()
+output_model = os.path.join(experiment_path, "Project.hdf5")
+background_model = client.submit(train_bobalgorithm, extract_training_futures, algorithm, output_model)
 
+
+#4. PROJECTING
+
+projected_enroll_futures = []
+projected_probe_futures = []
+
+
+output_path = os.path.join(experiment_path, "./projected")
+
+for  e_o, p_o in zip(preproc_enroll_futures, preproc_probe_futures):
+
+    projected_enroll_futures.append(
+            client.submit(project_bobalgorithm,
+                          e_o,
+                          algorithm,
+                          background_model,
+                          output_path)
+            )
+
+    projected_probe_futures.append(
+            client.submit(project_bobalgorithm,
+                          p_o,
+                          algorithm,
+                          background_model,
+                          output_path)
+            )
+
+
+
+#5. CREATE TEMPLATE
+
+template_enroll_futures = []
+
+output_path = os.path.join(experiment_path, "./models")
+
+
+"""
+for e_o, p_o in zip(preproc_enroll_futures, preproc_probe_futures):
+
+    projected_enroll_futures.append(
+            client.submit(project_bobalgorithm,
+                          e_o,
+                          algorithm,
+                          background_model,
+                          output_path)
+            )
+
+    projected_probe_futures.append(
+            client.submit(project_bobalgorithm,
+                          p_o,
+                          algorithm,
+                          background_model,
+                          output_path)
+            )
+"""
+
+#for  e_o, p_o in zip(projected_enroll_futures, projected_probe_futures):
+#    e_o.result()
+#    p_o.result()
+
+
+#project_bobalgorithm(bio_files, algorithm, background_model, output_path, output_extension=".hdf5"):
 
 #serialized_machine = pca_model.result()
 #machine = from_dict(serialized_machine)
