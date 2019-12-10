@@ -18,6 +18,7 @@ from samples import BiometricSamples, create_training_samples, create_biometric_
 
 import functools
 import operator
+import bob.io.base
 
 
 NODES = 10
@@ -33,7 +34,7 @@ NODES = 10
 
 ### SGE
 
-
+#"""
 from dask_jobqueue import PBSCluster, SGECluster
 
 q1d_resource_spec = "q_1day=TRUE,io_big=TRUE"
@@ -48,7 +49,7 @@ cluster = SGECluster(queue="q_1day", memory='4GB', cores=2,
 
 cluster.scale_up(NODES)
 client = Client(cluster)  # start local workers as threads
-
+#"""
    
 
 #############
@@ -78,8 +79,6 @@ client = Client(cluster)  # start local workers as threads
 #cluster.worker_spec[i] = spec
 #cluster.scale_up(1)
 
-##############
-#import ipdb; ipdb.set_trace()
 
 
 ##########
@@ -87,6 +86,8 @@ client = Client(cluster)  # start local workers as threads
 ##########
 
 experiment_path = "/idiap/user/tpereira/github/snakemaking/dask/bob_bio/test/"
+bob.io.base.create_directories_safe(experiment_path)
+
 database_path = "/idiap/group/biometric/databases/biometrics/face2D/orl/"
 database_extension = ".pgm"
 
@@ -102,16 +103,6 @@ training_samples = create_training_samples(BiometricSamples, db)
 template_samples = create_biometric_template(BiometricSamples, db)
 
 probe_samples = create_biometric_probes(BiometricSamples, db, template_samples)
-
-
-#    def create_biometric_template(cls, database, group="dev", protocol="Default"):
-#training_objects = amend_path(db.training_files(), database_path, database_extension)
-#enroll_objects = amend_path(db.enroll_files(), database_path, database_extension)
-#probe_objects = amend_path(db.probe_files(), database_path, database_extension)
-
-#training_objects = db.training_files()
-#enroll_objects = db.enroll_files()
-#probe_objects = db.probe_files()
 
 
 def read_bobbiodata(file_name):
@@ -158,7 +149,7 @@ def cache_bobbio_samples(output_path, output_extension):
                         # Save
                         bob.io.base.create_directories_safe(os.path.dirname(file_name))
                         write_bobbiodata(o.sample, file_name)
-                        o.sample = None
+                        #o.sample = None
 
 
             return biometric_samples
@@ -237,8 +228,6 @@ def create_bobbio_templates(biometric_samples, algorithm):
     for f in biometric_samples:
         template_data = read_biofiles([f], bob.io.base.load)
         f.samples = algorithm.enroll(template_data)
-        pass
-
 
     return biometric_samples
 
@@ -259,14 +248,24 @@ def compute_bobbio_scores(biometric_samples, biometric_templates, algorithm):
 
                 bobbio_path = b.samples[0].make_path()
 
+
+                # TODO: ASSUMING THAT IS ARRAY
+                template = numpy.array(template_sample.samples)
+                probe = numpy.array(b.samples[0].sample)
+
                 import logging
                 logging.basicConfig()
                 logger = logging.getLogger()
                 logger.setLevel(logging.INFO)
-                logger.info( template_sample.samples )
-                logger.info(b.samples[0].sample)
+                logger.info(template.shape)
+                logger.info(probe.shape)
+                logger.info("###################")
+               
+                #logger.info(template_sample.samples[0].sample)
+                #logger.info(.samples[0].sample)
+                #logger.info(template.shape)
 
-                score = algorithm.score(numpy.array(template_sample.samples),  b.samples[0].sample)
+                score = algorithm.score(template,  probe)
 
                 score_strings.append(f"{t.template_id} {b.template_id} {bobbio_path} {score}")
 
@@ -325,15 +324,6 @@ for t_o, e_o, p_o in zip(training_objects_split, template_objects_split, probe_o
                           processor=preprocessor
                          )
             )
-#import ipdb; ipdb.set_trace()
-
-
-#for t_o, e_o, p_o in zip(preproc_training_futures, preproc_enroll_futures, preproc_probe_futures):
-#    t_o.result()
-#    e_o.result()
-#    p_o.result()
-#exit()
-
  
 # 2. EXTRACT
 
@@ -372,11 +362,6 @@ for t_o, e_o, p_o in zip(preproc_training_futures, preproc_enroll_futures, prepr
                           processor=extractor
                           )
             )
-
-#for t_o, e_o, p_o in zip(extract_training_futures, extract_enroll_futures, extract_probe_futures):
-#    t_o.result()
-#    e_o.result()
-#    p_o.result()
 
 
 
@@ -418,11 +403,6 @@ for  e_o, p_o in zip(extract_enroll_futures, extract_probe_futures):
                          )
             )
 
-#for  e_o, p_o in zip(projected_enroll_futures, projected_probe_futures):
-#    e_o.result()
-#    p_o.result()
-
-
 
 #5. CREATE TEMPLATE
 
@@ -446,33 +426,21 @@ for e_o in projected_enroll_futures:
 ### SYNC. THE MODELS I DON'T KNOW IF THIS IS NECESSARY
 
 all_templates = []
-for e_o in projected_enroll_futures:
+for p_o in projected_probe_futures:
+    while not p_o.done():        
+        pass
+
+for e_o in template_enroll_futures:
     all_templates += e_o.result()
 
 
-for p_o in projected_probe_futures:
-    while not p_o.done():
-        print("Waiting PROBE .....")
-        time.sleep(0.1)
-        continue
-
-#for e_o in projected_enroll_futures:
-#    while not e_o.done():
-#        print("Waiting ENROLL .....")
-#        time.sleep(0.1)
-#        continue
+####
 
 
-### END SYNC
-
- 
 #6. SCORING
 score_futures = []
-#import ipdb; ipdb.set_trace()
-#all_templates = functools.reduce(operator.concat, template_enroll_futures)
-
 for p_o in projected_probe_futures:
-   
+
     score_futures.append(
             client.submit(
                     compute_bobbio_scores,
@@ -487,9 +455,6 @@ for p_o in score_futures:
     score_strings += p_o.result()
 
 open(os.path.join(experiment_path, "scores-dev"), 'w').write('\n'.join(score_strings))
-
-#import ipdb; ipdb.set_trace()
-
-
-pass
 #"""
+
+
