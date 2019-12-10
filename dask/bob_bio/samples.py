@@ -26,63 +26,8 @@ class BiometricSamples(object):
         self.samples = samples
 
 
-    @classmethod
-    def create_biometric_template(cls, database, group="dev", protocol="Default"):
-        """
-         Factory of Biometric templates.
-
-         The class is meant to interface with `:py:class:bob.db.base.Database` to
-         dump BiometricTemplateSample       
-        """
-
-        biometric_templates = []
-        # TODO: MISSING PROTOCOL
-        model_ids = database.model_ids(groups=group)
-        for m in model_ids:
-            samples = database.objects(
-                    protocol=protocol, groups=group, model_ids=(m,), purposes='enroll')
-
-            for s in samples:
-                s.current_directory = database.original_directory
-                s.current_extension = database.original_extension
-                s.sample = None
-
-
-            biometric_template = cls(m, samples)
-            biometric_templates.append(biometric_template)
-            
-        return biometric_templates
-
-
-    @classmethod
-    def create_training_samples(cls, database, group="dev", protocol="Default"):
-        """
-         Factory of Biometric templates.
-
-         The class is meant to interface with `:py:class:bob.db.base.Database` to
-         dump BiometricTemplateSample       
-        """
-
-        # TODO: Maybe organize by client
-        biometric_samples = []
-        samples = database.objects(
-                  protocol=protocol, groups='world')
-
-        for s in samples:
-             s.current_directory = database.original_directory
-             s.current_extension = database.original_extension
-             s.sample = None
-
-             biometric_sample = cls(s.client_id, samples)
-             biometric_samples.append(biometric_sample)
-            
-        return biometric_samples
-
-
-
 class BiometricProbeSamples(BiometricSamples):
     """
-   
 
     Parameters:
 
@@ -99,8 +44,83 @@ class BiometricProbeSamples(BiometricSamples):
     def __init__(self, template_id, samples, template_list):
         
         self.template_id = template_id
-        self.samples = samples
+        self.samples = [samples]
         self.template_list = template_list
 
-    #TODO
+
+def create_biometric_probes(cls, database, templates, group="dev", protocol="Default"):
+    """
+    Attempt to generate probe objects
+    """
+
+    probes = dict()
+    for t in templates:
+        objects = database.objects(
+                protocol=protocol, groups=group, model_ids=(t.template_id,), purposes='probe')
+        for o in objects:
+            if o.id not in probes:
+
+                o.current_directory = database.original_directory
+                o.current_extension = database.original_extension
+                o.sample = None
+
+                probes[o.id] = BiometricProbeSamples(o.client_id, o, [])
+
+            probes[o.id].template_list.append(t)
+
+    probes_list = [probes[k] for k in probes]
+
+    return probes_list
+
+
+
+def create_biometric_template(cls, database, group="dev", protocol="Default"):
+    """
+     Factory of Biometric templates.
+
+     The class is meant to interface with `:py:class:bob.db.base.Database` to
+     dump BiometricTemplateSample       
+    """
+
+    biometric_templates = []
+    # TODO: MISSING PROTOCOL
+    model_ids = database.model_ids(groups=group)
+    for m in model_ids:
+        samples = database.objects(
+                protocol=protocol, groups=group, model_ids=(m,), purposes='enroll')
+
+        for s in samples:
+            s.current_directory = database.original_directory
+            s.current_extension = database.original_extension
+            s.sample = None
+
+
+        biometric_template = cls(m, samples)
+        biometric_templates.append(biometric_template)
+        
+    return biometric_templates
+
+
+def create_training_samples(cls, database, group="dev", protocol="Default"):
+    """
+     Factory of Biometric templates.
+
+     The class is meant to interface with `:py:class:bob.db.base.Database` to
+     dump BiometricTemplateSample       
+    """
+
+    # TODO: Maybe organize by client
+    biometric_samples = []
+    samples = database.objects(
+              protocol=protocol, groups='world')
+
+    for s in samples:
+        s.current_directory = database.original_directory
+        s.current_extension = database.original_extension
+        s.sample = None
+
+        biometric_sample = cls(s.client_id, [s])
+        biometric_samples.append(biometric_sample)
+
+    return biometric_samples
 

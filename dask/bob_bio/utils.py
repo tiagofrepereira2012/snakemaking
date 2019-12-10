@@ -35,7 +35,7 @@ def read_biofiles(objects, loader, split_by_client = False, allow_missing_files 
   if split_by_client:
       return [[extractor.read_feature(f) for f in client_files] for client_files in file_names]
   else:
-      return numpy.vstack([loader(o.make_path(o.current_directory, o.current_extension)).astype("float64") if o.sample is None else o.sample for o in objects])
+      return numpy.vstack([loader(s.make_path(s.current_directory, s.current_extension)).astype("float64") if s.sample is None else s.sample for o in objects for s in o.samples  ])
 
 
 
